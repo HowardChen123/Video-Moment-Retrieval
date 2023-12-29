@@ -1,1 +1,1 @@
-This directory contains all the sourcee code.
+This directory contains all the source code.
