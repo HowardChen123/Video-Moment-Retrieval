@@ -8,7 +8,7 @@ def find_scenes(video_path):
     scene_list = detect(video_path, ContentDetector())
     return scene_list
 
-def extract_frames(video_path, scenes, folder_path, num_frames=5):
+def extract_frames(video_path, scenes, folder_path, total_limit=5):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -17,25 +17,36 @@ def extract_frames(video_path, scenes, folder_path, num_frames=5):
         shutil.rmtree(folder_path)
     os.makedirs(folder_path, exist_ok=True)
 
-    if scenes:
-        for start_time, end_time in scenes:
-            start_frame = int(start_time.get_frames())
-            end_frame = int(end_time.get_frames())
+    # Extract the first frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    ret, frame = cap.read()
+    if ret:
+        cv2.imwrite(os.path.join(folder_path, 'frame_start.jpg'), frame)
 
-            for frame_num in range(start_frame, end_frame + 1):
-                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
-                ret, frame = cap.read()
-                if ret:
-                    cv2.imwrite(os.path.join(folder_path, f'frame_{frame_num}.jpg'), frame)
-    else:
-        # No scenes detected: Extract frames at start, end, and evenly spaced in between
-        interval = total_frames // (num_frames - 1)
-        for i in range(num_frames):
-            frame_num = min(i * interval, total_frames - 1)
+    # Calculate the interval for frame extraction, excluding the first and last frames
+    interval = max(1, (total_frames - 2) // (total_limit - 2))
+    extracted_count = 1
+
+    for start_time, end_time in scenes:
+        if extracted_count >= total_limit - 1:
+            break
+        start_frame = max(1, int(start_time.get_frames()) + 1)  # Skip the first frame
+        end_frame = min(total_frames - 2, int(end_time.get_frames()) - 1)  # Skip the last frame
+
+        for frame_num in range(start_frame, end_frame, interval):
+            if extracted_count >= total_limit - 1:
+                break
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
             ret, frame = cap.read()
             if ret:
                 cv2.imwrite(os.path.join(folder_path, f'frame_{frame_num}.jpg'), frame)
+                extracted_count += 1
+
+    # Extract the last frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, total_frames - 1)
+    ret, frame = cap.read()
+    if ret:
+        cv2.imwrite(os.path.join(folder_path, 'frame_end.jpg'), frame)
 
     cap.release()
 
@@ -43,10 +54,10 @@ if __name__ == "__main__":
     for i in range(1, 12):
         # Video file path
         video_file_path = f'example/algorithm_video/transnetv2/segments/{i}/segment_{i}.mp4'
-        folder_path = 'example/algorithm_video/transnetv2/segments/{i}/frames/'
+        folder_path = f'example/algorithm_video/transnetv2/segments/{i}/frames/'
 
         # Find scenes with an adjusted threshold if necessary
         scenes = find_scenes(video_file_path)  # Adjust the threshold value as needed
 
         # Extract frames with specified number or fallback to start, end, and between
-        extract_frames(video_file_path, scenes, folder_path, num_frames=5)
+        extract_frames(video_file_path, scenes, folder_path)
