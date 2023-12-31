@@ -39,12 +39,14 @@ def extract_frames(video_path, scenes, folder_path, num_frames=5):
 
     cap.release()
 
-# Video file path
-video_file_path = 'example/algorithm_video/transnetv2/segments/1/segment_01.mp4'
-folder_path = 'example/algorithm_video/transnetv2/segments/1/frames/'
+if __name__ == "__main__":
+    for i in range(1, 12):
+        # Video file path
+        video_file_path = f'example/algorithm_video/transnetv2/segments/{i}/segment_{i}.mp4'
+        folder_path = 'example/algorithm_video/transnetv2/segments/{i}/frames/'
 
-# Find scenes with an adjusted threshold if necessary
-scenes = find_scenes(video_file_path)  # Adjust the threshold value as needed
+        # Find scenes with an adjusted threshold if necessary
+        scenes = find_scenes(video_file_path)  # Adjust the threshold value as needed
 
-# Extract frames with specified number or fallback to start, end, and between
-extract_frames(video_file_path, scenes, folder_path, num_frames=5)
+        # Extract frames with specified number or fallback to start, end, and between
+        extract_frames(video_file_path, scenes, folder_path, num_frames=5)

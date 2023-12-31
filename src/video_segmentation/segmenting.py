@@ -16,7 +16,7 @@ for i, (start, end) in enumerate(timestamps, 1):
     if not os.path.exists(segment_directory):
         os.makedirs(segment_directory)
 
-    output_segment = os.path.join(segment_directory, f'segment_{i:02}.mp4')
+    output_segment = os.path.join(segment_directory, f'segment_{i}.mp4')
     
     # FFmpeg command to segment the video
     command = [
