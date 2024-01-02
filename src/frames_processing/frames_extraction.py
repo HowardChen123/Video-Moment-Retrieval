@@ -1,6 +1,5 @@
 from scenedetect import detect, AdaptiveDetector, ContentDetector, ThresholdDetector
 import cv2
-import numpy as np
 import os
 import shutil
 
@@ -21,7 +20,7 @@ def extract_frames(video_path, scenes, folder_path, total_limit=5):
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     ret, frame = cap.read()
     if ret:
-        cv2.imwrite(os.path.join(folder_path, 'frame_start.jpg'), frame)
+        cv2.imwrite(os.path.join(folder_path, 'frame_0.jpg'), frame)
 
     # Calculate the interval for frame extraction, excluding the first and last frames
     interval = max(1, (total_frames - 2) // (total_limit - 2))
@@ -43,10 +42,11 @@ def extract_frames(video_path, scenes, folder_path, total_limit=5):
                 extracted_count += 1
 
     # Extract the last frame
-    cap.set(cv2.CAP_PROP_POS_FRAMES, total_frames - 1)
+    end = total_frames - 1
+    cap.set(cv2.CAP_PROP_POS_FRAMES, end)
     ret, frame = cap.read()
     if ret:
-        cv2.imwrite(os.path.join(folder_path, 'frame_end.jpg'), frame)
+        cv2.imwrite(os.path.join(folder_path, f'frame_{end}.jpg'), frame)
 
     cap.release()
 
