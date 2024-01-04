@@ -9,9 +9,7 @@ def get_openai_api_key(file_path):
 os.environ["OPENAI_API_KEY"] = get_openai_api_key("api_key.txt")
 
 class ImageAnalyzer:
-    def __init__(self, api_key_file='api_key.txt', model_name="gpt-4-vision-preview", max_tokens=512):
-        self.api_key = self.get_openai_api_key(api_key_file)
-        os.environ["OPENAI_API_KEY"] = self.api_key
+    def __init__(self, api_key_file='api_key.txt', model_name="gpt-4-vision-preview", max_tokens=600):
         self.model = ChatOpenAI(model=model_name, max_tokens=max_tokens)
 
     @staticmethod
@@ -28,14 +26,13 @@ class ImageAnalyzer:
             [
                 HumanMessage(
                     content=[
-                        {"type": "text", "text": "Review these multiple images, which represent frames from a scene, and use a chain-of-thought approach to infer the scene's overall theme or story. Start by briefly noting any common elements or recurring themes across the images. Then, consider what these elements or themes suggest about the scene's content. Are there any patterns or consistent messages? Finally, based on these observations, synthesize a summary of the scene's likely narrative or main topic. Focus on the overarching story the images collectively convey."},
+                        {"type": "text", "text": "Review these multiple images, which represent frames from a scene, and use a chain-of-thought approach to infer the scene's overall theme or story. Start by briefly noting any common elements or recurring themes across the images. Then, consider what these elements or themes suggest about the video's content. Are there any patterns or consistent messages? Finally, based on these observations, synthesize a summary of the video's likely narrative or main topic. Focus on the overarching story the images collectively convey."},
                         *image_messages
                     ]
                 )
             ]
         )
         return msg.content
-
 
 if __name__ == "__main__":
     # Example usage

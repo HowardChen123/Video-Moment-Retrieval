@@ -28,5 +28,6 @@ if __name__ == "__main__":
     folder_path = 'example/algorithm_video/transnetv2/segments'
     document_searcher = DocumentSearcher(folder_path)
     query = "What is BFS"
-    docs = document_searcher.search_documents(query)
+    docs = document_searcher.search_documents(query, k=2)
     print(docs)
+    print(docs[0].metadata['source'])

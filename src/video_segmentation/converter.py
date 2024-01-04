@@ -1,40 +1,42 @@
 import numpy as np
-
-scenes = np.load("example/algorithm_video/transnetv2/scenes.npy")
-
-print(scenes)
-
 import json
 
-file_path = 'example/algorithm_video/transnetv2/frameID_timestamps.json'
+class SceneTimestampConverter:
+    def __init__(self, scenes, timestamps):
+        self.scenes = scenes
+        self.timestamps_map = timestamps
+        self.result_array = np.empty(self.scenes.shape, dtype=object)
 
-with open(file_path, 'r') as file:
-    timestamps_map = json.load(file)
-timestamps_map = {int(key): value for key, value in timestamps_map.items()}
+    def convert_timestamps(self):
+        for i in range(self.scenes.shape[0]):
+            for j in range(self.scenes.shape[1]):
+                key = self.scenes[i, j]
+                if key not in self.timestamps_map:
+                    key = key - 1 if j == 1 else key + 1
+                self.result_array[i, j] = self.timestamps_map.get(key, "Key not found")
+        self.result_array[0, 0] = 0.0
+        return np.vectorize(self.seconds_to_hh_mm_ss_mmm)(self.result_array)
 
-result_array = np.empty(scenes.shape, dtype=object)
+    @staticmethod
+    def seconds_to_hh_mm_ss_mmm(seconds):
+        hours, remainder = divmod(int(seconds), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        milliseconds = int((seconds - int(seconds)) * 1000)
+        return '{:02}:{:02}:{:02}.{:03}'.format(hours, minutes, int(seconds), milliseconds)
 
-for i in range(scenes.shape[0]):
-    for j in range(scenes.shape[1]):
-        key = scenes[i, j]
-        if key not in timestamps_map:
-            if j == 1:
-                key -= 1
-            if j == 2:
-                key += 1
-        result_array[i, j] = timestamps_map.get(key, "Key not found")
-result_array[0, 0] = 0.0
 
-def seconds_to_hh_mm_ss_mmm(seconds):
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds_remainder = seconds % 60
-    whole_seconds = int(seconds_remainder)
-    milliseconds = int((seconds_remainder - whole_seconds) * 1000)
-    return '{:02}:{:02}:{:02}.{:03}'.format(hours, minutes, whole_seconds, milliseconds)
+if __name__ == "__main__":
+    # Example usage
+    scenes_file = "example/algorithm_video/transnetv2/scenes.npy"
+    scenes = np.load(scenes_file)
 
-# Apply the conversion to each element in the array
-converted_array = np.vectorize(seconds_to_hh_mm_ss_mmm)(result_array)
-np.save("example/algorithm_video/transnetv2/scenes_timestamp.npy", converted_array)
+    timestamps_file = 'example/algorithm_video/transnetv2/frameID_timestamps.json'
+    def load_timestamps(file_path):
+        with open(file_path, 'r') as file:
+            timestamps_map = json.load(file)
+        return {int(key): value for key, value in timestamps_map.items()}
+    frameID_timestamps = load_timestamps(timestamps_file)
 
-print(converted_array)
+    converter = SceneTimestampConverter(scenes, frameID_timestamps)
+    converted_array = converter.convert_timestamps()
+    print(converted_array)

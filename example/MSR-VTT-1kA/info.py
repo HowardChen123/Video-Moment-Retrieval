@@ -6,7 +6,7 @@ test_csv_path = 'example/MSR-VTT-1kA/MSRVTT_JSFUSION_test.csv' # 1k video captio
 
 test_sample_csv_path = 'example/MSR-VTT-1kA/MSRVTT_JSFUSION_test_sample.csv'
 
-sample_num = 1000 # you can change this sample_num to be smaller, so that this notebook will be faster.
+sample_num = 100 # you can change this sample_num to be smaller, so that this notebook will be faster.
 test_df = pd.read_csv(test_csv_path)
 print('length of all test set is {}'.format(len(test_df)))
 sample_df = test_df.sample(sample_num, random_state=42)
